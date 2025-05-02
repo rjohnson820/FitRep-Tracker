@@ -1,6 +1,20 @@
+"""
+Author: Robert Johnson
+Date: 04/29/2025
+Program: FitRep Tracker
+Ver. 1
+
+The purpose of this program is to allow the user to enter workout information into the workout log and save
+save it to the workout history log
+"""
+
+#Imports GUI Libraries and converts tkinter to tk
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
+from PIL import ImageTk, Image
+
+#Global list for saving information from the dayLogs to the workoutHistory log
 exerciseLog = []
 
 def openWorkoutLog():
@@ -28,7 +42,7 @@ def openWorkoutLog():
         def addWorkoutToLog():
             """adds exercise to the log after inputs are selected"""
             name = exerciseNameEntry.get().strip()
-            excerciseType = exerciseTypeDropdown.get().strip()
+            exerciseType = exerciseTypeDropdown.get().strip()
             weight = weightEntry.get().strip()
             sets = setsEntry.get().strip()
             reps = repsEntry.get().strip()
@@ -36,11 +50,11 @@ def openWorkoutLog():
             day = dayLogWindow.title().split(' ')[0]
 
             # Check if any field is empty or invalid
-            if not name or excerciseType == 'Select Type' or not weight or not sets or not reps or intensity == '1–10':
+            if not name or exerciseType == 'Select Type' or not weight or not sets or not reps or intensity == '1–10':
                 messagebox.showwarning("Missing Info", "Please fill out all fields correctly.")
                 return
 
-            # Validate that weight, sets, reps, and intensity are numbers
+            # Checks that the weight, sets, reps, and intensity are valid inputs
             try:
                 weightNum = float(weight)
                 setsNum = int(sets)
@@ -50,18 +64,18 @@ def openWorkoutLog():
                 messagebox.showerror("Invalid Input", "Weight must be a number, and Sets, Reps, Intensity must be integers.")
                 return
 
-            # Format the entry
-            entryText = f"{name} | {excerciseType} | {weightNum} lbs | {setsNum} sets | {repsNum} reps | Intensity {intensityNum}"
+            #Formats the entry for the log
+            entryText = f"{name} | {exerciseType} | {weightNum} lbs | {setsNum} sets | {repsNum} reps | Intensity {intensityNum}"
 
             #Adds exercises to shared list of daylog and history log
             exerciseLog.append((day, entryText)) 
 
             # Add to log display
-            entryLabel = tk.Label(logDisplayFrame, text=entryText, font=('Georgia', 12),
-                           anchor='n', bg='white', relief='groove')
-            entryLabel.pack(fill='x', padx=5, pady=2)
+            entryLabel = tk.Label(logDisplayFrame, text = entryText, font = ('Georgia', 12),
+                           anchor = 'n', bg  ='white', relief = 'groove')
+            entryLabel.pack(fill = 'x', padx = 5, pady = 2)
 
-            # Clear fields
+            # Clear fields after entry is added
             exerciseNameEntry.delete(0, tk.END)
             exerciseTypeDropdown.set('Select Type')
             weightEntry.delete(0, tk.END)
@@ -69,13 +83,12 @@ def openWorkoutLog():
             repsEntry.delete(0, tk.END)
             intensityDropdown.set('1–10')
 
-
         def backToMain():
-            '''Closes the Daylog subwindow'''
+            '''Closes the dayLog subwindow'''
             dayLogWindow.destroy()
 
         def saveWorkoutLog():
-            """Confirms that workout data was saved (already added to exerciseLog)"""
+            """Confirms that workout data was saved and clears log data in frame"""
             for widget in logDisplayFrame.winfo_children():
                 widget.destroy()
                 #resets entry windows
@@ -92,7 +105,7 @@ def openWorkoutLog():
         contentFrame = tk.Frame(dayLogWindow, bg = '#D3D3D3')
         contentFrame.grid(row = 0, column = 0, sticky = 'NSEW', padx = 10, pady = 10)
 
-        #Headers for Frame
+        #Header list for Frame
         headers = ['Add (+)', 'Exercise Name', 'Exercise Type/Weight Type', 'Weight (lbs)', 'Sets', 'Reps', 'Intensity (1–10)']
         headerLabels = []
         
@@ -102,51 +115,49 @@ def openWorkoutLog():
             headerLabels.append(headerLabel)
 
         for columnIndex, headerLabel in enumerate(headerLabels):
-            headerLabel.grid(row=0, column = columnIndex, padx = 5, pady = 5)
+            headerLabel.grid(row= 0, column = columnIndex, padx = 5, pady = 5)
         for columns in range(7):  # One for each header column
             contentFrame.grid_columnconfigure(columns, weight=1)
 
-        #Add Button for adding exercise to etc.
+        #Add Button for adding exercise to frame
         addButton = tk.Button(contentFrame, text = '+', font = ('Georgia', 9, 'bold'), fg = 'blue', bg = '#FFDF00',
-                                  bd = 2, relief ='ridge', width =5, command = addWorkoutToLog)
-        #List Index for Row 1's exercise types and intensity scales
+                                  bd = 2, relief ='ridge', width = 5, command = addWorkoutToLog)
+
+        #Values for combo boxes
         exerciseTypes = ['Dumbbells', 'Barbell and Plates', 'Machine', 'Body Weight']
         intensityScale = [str(i) for i in range(1, 11)]
 
-        #Comboboxs for Entry selection 
-        exerciseTypes = ['Dumbbells', 'Barbell and Plates', 'Machine', 'Body Weight']
+        #Combo boxes for selecting exercise type and intensity
         exerciseTypeDropdown = ttk.Combobox(contentFrame, values=exerciseTypes, state='readonly')
         exerciseTypeDropdown.set('Select Type')
 
-        intensityScale = [str(i) for i in range(1, 11)]
         intensityDropdown = ttk.Combobox(contentFrame, values=intensityScale, state='readonly')
-        intensityDropdown.set('1–10')
+        intensityDropdown.set('1 – 10')
 
-        #Input Entry sections for Exercises
+        #Input Entry sections for exercise data
         exerciseNameEntry = tk.Entry(contentFrame, width = 20)
         weightEntry = tk.Entry(contentFrame, width = 10)
         setsEntry = tk.Entry(contentFrame, width = 5)
         repsEntry = tk.Entry(contentFrame, width = 5)
 
-        #Grid layout for entrys
+        #Grid layout for entry sections and combo boxes
         addButton.grid(row = 1, column = 0, padx = 5, pady = (0,2), sticky = 'N')
         exerciseNameEntry.grid(row = 1, column = 1, padx = 5, pady = (0,2), sticky = 'N')
         exerciseTypeDropdown.grid(row = 1, column = 2, padx = 5, pady = (0,2), sticky = 'N')
         weightEntry.grid(row = 1, column = 3, padx = 5, pady = (0,2), sticky = 'N')
-        setsEntry.grid(row = 1, column = 4, padx= 5, pady = (0,2), sticky = 'N')
+        setsEntry.grid(row = 1, column = 4, padx = 5, pady = (0,2), sticky = 'N')
         repsEntry.grid(row = 1, column = 5, padx = 5, pady = (0,2), sticky = 'N')
         intensityDropdown.grid(row = 1, column = 6, padx = 5 ,pady = (0,2), sticky = 'N')
         contentFrame.grid_rowconfigure(2, weight=1)
         
-        #log display
-        logDisplayFrame = tk.Frame(contentFrame, bg='#EDEDED', bd=1, relief='sunken')
+        #Frame for displaying workout entries in the day log
+        logDisplayFrame = tk.Frame(contentFrame, bg ='#EDEDED', bd = 1, relief = 'sunken')
         logDisplayFrame.grid(row = 2, column = 0, columnspan = 7, pady = (5 , 0), sticky = 'NEW')
-        logDisplayFrame.grid_columnconfigure(0, weight=1)
+        logDisplayFrame.grid_columnconfigure(0, weight = 1)
         
-
-        #Bottom Frame for buttons
-        bottomFrame = tk.Frame(dayLogWindow, bg='#D3D3D3')
-        bottomFrame.grid(row=1, column=0, sticky='ew', pady=20)
+        #Bottom Frame for buttons in dayLogWindow
+        bottomFrame = tk.Frame(dayLogWindow, bg ='#D3D3D3')
+        bottomFrame.grid(row = 1, column=0, sticky ='EW', pady = 20)
         
         #Buttons for dayLogWindow bottom frame
         backDayButton = tk.Button(bottomFrame, text = 'Back', font = ('Georgia', 16, 'bold'), fg = 'blue', bg = '#FFDF00',
@@ -154,13 +165,14 @@ def openWorkoutLog():
         saveButton = tk.Button(bottomFrame, text = 'Save', font = ('Georgia', 16, 'bold'), fg = 'blue', bg = '#FFDF00',
                                   bd = 2, relief ='ridge', width = 5, command = saveWorkoutLog)
         
-        backDayButton.grid(row = 0, column = 0, padx= 10)
-        saveButton.grid(row = 0, column = 1, padx= 10)
+        #Layout for the bottom buttons
+        backDayButton.grid(row = 0, column = 0, padx = 10)
+        saveButton.grid(row = 0, column = 1, padx = 10)
         
-        #grid Layout for DayLog Window
-        dayLogWindow.grid_rowconfigure(0, weight=1)
-        dayLogWindow.grid_rowconfigure(1, weight=0)
-        dayLogWindow.grid_columnconfigure(0, weight=1)
+        #configures columns and rows making them expand and contract as window size changes
+        dayLogWindow.grid_rowconfigure(0, weight = 1)
+        dayLogWindow.grid_rowconfigure(1, weight = 0)
+        dayLogWindow.grid_columnconfigure(0, weight = 1)
 
     #Sunday-Saturday Workout Buttons using Index
     daysOfWeek = ['Sunday','Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -168,9 +180,10 @@ def openWorkoutLog():
         dayButton = tk.Button(workoutLogWindow, text = day, font = ('Georgia', 16, 'bold'), fg = 'blue', bg = '#FFDF00', 
                  bd = 2, relief = 'ridge', width = 20, command = lambda d = day: openDayLog(d))
         
-    
-    #Creates a grid based on the index
-        dayButton.grid(row = index, column = 0, columnspan= 2, pady = 11, padx =10)
+        #Creates a grid for daysOfWeek buttons
+        dayButton.grid(row = index, column = 0, columnspan = 2, pady = 11, padx = 10)
+
+    #Back button for workoutLogWindow to return to root    
     backLogButton = tk.Button(workoutLogWindow, text = 'Back', font = ('Georgia', 16, 'bold'), fg = 'blue', bg = '#FFDF00', 
                  bd = 2, relief = 'ridge', width = 5, command = backToMain)
     backLogButton.grid(row = len(daysOfWeek), column = 0, sticky = 'W', padx = 15, pady = 10)
@@ -180,7 +193,6 @@ def openWorkoutLog():
         workoutLogWindow.grid_rowconfigure(index, weight = 1)
     workoutLogWindow.grid_columnconfigure(0, weight = 1)
     workoutLogWindow.grid_rowconfigure(0, weight = 1)
-
 
 def openWorkoutHistory():
     """Opens the Workout History Window and its content."""
@@ -193,11 +205,11 @@ def openWorkoutHistory():
     workoutHistoryWindow.grab_set()
 
     def backToMain():
-        """Closes the History subwindow"""
+        """Closes the workoutHistory subwindow"""
         workoutHistoryWindow.destroy()
 
     def deleteWorkoutHistoryEntry():
-        """Deletes the selected workout entry from the history"""
+        """Deletes the selected workout entry from the history and shows confirmation"""
         selectedIndex = historyDisplay.curselection()
         if selectedIndex:
             index = selectedIndex[0]
@@ -205,23 +217,24 @@ def openWorkoutHistory():
             historyDisplay.delete(index)
             messagebox.showinfo('Deleted Entry', 'The selected workout has been deleted.')
 
-    # Create a frame to display history
+    # Creates a frame to display history
     historyFrame = tk.Frame(workoutHistoryWindow, bg='#D3D3D3')
-    historyFrame.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
+    historyFrame.grid(row = 0, column = 0, sticky ='NSEW', padx = 10, pady = 10)
 
-    # Create a scrollbar for the history window
+    # Creates a scrollbar for the historyFrame
     historyScroll = tk.Scrollbar(historyFrame)
-    historyScroll.grid(row=0, column=1, sticky='NS')
+    historyScroll.grid(row = 0, column = 1, sticky ='NS')
 
-    # Display the workout history logs
-    historyDisplay = tk.Listbox(historyFrame, yscrollcommand=historyScroll.set, width=80, height=20)
-    for entry in exerciseLog:  # Populate the listbox with the log entries
+    #Creates a list box for the historyFrame and populates
+    historyDisplay = tk.Listbox(historyFrame, yscrollcommand = historyScroll.set, width = 80, height = 20)
+    for entry in exerciseLog:
         historyDisplay.insert(tk.END, entry)
 
-    historyDisplay.grid(row=0, column=0, padx=10, pady=10)
-    historyScroll.config(command=historyDisplay.yview)
+    #Creates grid  for historyDisplay
+    historyDisplay.grid(row = 0, column = 0, padx = 10, pady = 10)
+    historyScroll.config(command = historyDisplay.yview)
         
-    #Frame for Bottom
+    #Frame for bottom of workoutHistoryWindow
     bottomFrame = tk.Frame(workoutHistoryWindow, bg = '#D3D3D3')
     bottomFrame.grid(row = 1, column = 0, sticky = 'EW', pady = 20)
 
@@ -231,14 +244,14 @@ def openWorkoutHistory():
     deleteButton = tk.Button(bottomFrame, text = 'Delete', font = ('Georgia', 16, 'bold'), fg = 'blue', bg = '#FFDF00', 
                  bd = 2, relief = 'ridge', width = 5, command = deleteWorkoutHistoryEntry)
     
-    #Grid for History Window
+    #Grid for bottom frame for buttons on workoutHistoryWindow
     backHistoryButton.grid(row = 0, column = 0, sticky = 'W', padx = 15, pady = 10)
-    deleteButton.grid(row = 0, column = 2, sticky = 'W', padx = 15, pady =10)
+    deleteButton.grid(row = 0, column = 2, sticky = 'W', padx = 15, pady = 10)
 
-    #Grid Layout for History Window
+    #configures columns and rows making them expand and contract as window size changes
     workoutHistoryWindow.grid_rowconfigure(0, weight = 1)
-    workoutHistoryWindow.grid_rowconfigure(1, weight=0)
-    workoutHistoryWindow.grid_columnconfigure(0, weight=1)
+    workoutHistoryWindow.grid_rowconfigure(1, weight = 0)
+    workoutHistoryWindow.grid_columnconfigure(0, weight = 1)
 
 def exitProgram():
     """Closes Program and Shows a confirmation dialog before quitting"""
@@ -248,23 +261,32 @@ def exitProgram():
 
 root = tk.Tk()
 
-#sets the GUI Title for the Main Window
+#Sets the GUI Title for the Main Window
 root.title('FitRep Tracker')
+
+#Inserts REP icon for windows
+iconImage = ImageTk.PhotoImage(Image.open('REP.png'))
+root.iconphoto(False, iconImage)
 
 #Sets the root window size and enables size change of window
 root.geometry('640x480+300+300')
 root.resizable(True, True)
 root.configure(bg = '#D3D3D3')
 
-#Widgets for the Main Window
-title = tk.Label(root, text = ' Welcome to FitRep Tracker ', font = ('Georgia', 16, 'bold'), fg = 'blue', bg = '#FFDF00', 
-                 bd = 2, relief = 'raised', width = 30)
+#Inserts FitRep Logo in main window
+logoImage = Image.open('LOGO.png')
+logoImage = logoImage.resize((200, 100), Image.LANCZOS)  # Resize image here
+myImage = ImageTk.PhotoImage(logoImage)
+myLabel = tk.Label(root, image = myImage)
+myLabel.image = myImage
 
+#Widgets for the Main Window
+title = tk.Label(root, text = ' Welcome to FitRep Tracker ', font = ('Georgia', 16, 'bold'), fg = 'blue', bg = '#D3D3D3', 
+                 bd = 2, width = 30)
 
 #WorkoutLogButton
 workoutLogButton = tk.Button(root, text = ' Workout Log ', font = ('Georgia', 16, 'bold'), fg = 'blue', bg = '#FFDF00', 
                  bd = 2, relief = 'ridge', width = 20, command = openWorkoutLog)
-
 
 workoutHistoryButton = tk.Button(root, text = ' Workout History ', font = ('Georgia', 16, 'bold'), fg = 'blue', bg = '#FFDF00', 
                  bd = 2, relief = 'ridge', width = 20, command = openWorkoutHistory)
@@ -272,12 +294,12 @@ workoutHistoryButton = tk.Button(root, text = ' Workout History ', font = ('Geor
 exitButton = tk.Button(root, text = 'Exit', font = ('Georgia', 16, 'bold'), fg = 'blue', bg = '#FFDF00', 
                  bd = 2, relief = 'ridge', width = 20, command = exitProgram)
 
-
 #Widget Positions on Main Windows Grid
-title.grid(row = 0, column = 0, columnspan = 2, pady = 40)
-workoutLogButton.grid(row = 1, column = 0, padx = 20, pady = 20)
-workoutHistoryButton.grid(row = 1, column = 1, padx = 20, pady = 20)
-exitButton.grid(row = 2, column = 0, columnspan = 2, pady = 40)
+myLabel.grid(row = 0, column = 0, columnspan = 2, pady = (20, 0))
+title.grid(row = 1, column = 0, columnspan = 2, pady = 40)
+workoutLogButton.grid(row = 2, column = 0, padx = 20, pady = 20)
+workoutHistoryButton.grid(row = 2, column = 1, padx = 20, pady = 20)
+exitButton.grid(row = 3, column = 0, columnspan = 2, pady = 40)
 
 #configures columns and rows making them expand and contract as window size changes
 root.grid_columnconfigure(0, weight = 1)
