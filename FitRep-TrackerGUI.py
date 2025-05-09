@@ -4,18 +4,31 @@ Date: 04/29/2025
 Program: FitRep Tracker
 Ver. 1
 
-The purpose of this program is to allow the user to enter workout information into the workout log and save
-save it to the workout history log
+The purpose of this program is to allow the user to enter workout information into the workout log and
+save it to the workout history log. In the workout History log they can view the information or delete old information.
 """
 
 #Imports GUI Libraries and converts tkinter to tk
 import tkinter as tk
+import os
 from tkinter import messagebox
 from tkinter import ttk
 from PIL import ImageTk, Image
 
+# File path for saving workout data to WorkoutSaveHistory.txt
+saveFilePath = 'WorkoutSaveHistory.txt'
+
 #Global list for saving information from the dayLogs to the workoutHistory log
 exerciseLog = []
+
+# Loads saved data from WorkoutSaveHistory.txt into exerciseLog at startup
+if os.path.exists(saveFilePath):
+    with open(saveFilePath, 'r') as file:
+        for line in file:
+            parts = line.strip().split(' | ', 1)
+            if len(parts) == 2:
+                exerciseLog.append((parts[0], parts[1]))
+
 
 def openWorkoutLog():
     """Opens the Workout log window and its content."""
@@ -24,6 +37,9 @@ def openWorkoutLog():
     workoutLogWindow.geometry('640x480+300+300')
     workoutLogWindow.resizable(True, True)
     workoutLogWindow.configure(bg = '#D3D3D3')
+    #Inserts Rep Icon for window
+    workoutLogIconImage = ImageTk.PhotoImage(Image.open('REP.png'))
+    workoutLogWindow.iconphoto(False, workoutLogIconImage)
     #Prevents interaction with other windows while opened
     workoutLogWindow.grab_set()
     
@@ -37,6 +53,9 @@ def openWorkoutLog():
         dayLogWindow.title(f'{day} Workout')
         dayLogWindow.geometry('800x720+300+300')
         dayLogWindow.configure(bg = '#D3D3D3')
+        #Inserts Rep Icon for window
+        dayLogIconImage = ImageTk.PhotoImage(Image.open('REP.png'))
+        dayLogWindow.iconphoto(False, dayLogIconImage)
         dayLogWindow.grab_set()
 
         def addWorkoutToLog():
@@ -88,16 +107,23 @@ def openWorkoutLog():
             dayLogWindow.destroy()
 
         def saveWorkoutLog():
-            """Confirms that workout data was saved and clears log data in frame"""
+            """Confirms that workout data was saved and writes it to the file WorkoutSaveHistory.txt"""
+            # Save all current entries to file
+            with open(saveFilePath, 'w') as file:
+                for log in exerciseLog:
+                    file.write(f"{log[0]} | {log[1]}\n")
+
+            # Clear log display and reset input fields
             for widget in logDisplayFrame.winfo_children():
                 widget.destroy()
-                #resets entry windows
-                exerciseNameEntry.delete(0, tk.END)
-                exerciseTypeDropdown.set('Select Type')
-                weightEntry.delete(0, tk.END)
-                setsEntry.delete(0, tk.END)
-                repsEntry.delete(0, tk.END)
-                intensityDropdown.set('1–10')
+
+            exerciseNameEntry.delete(0, tk.END)
+            exerciseTypeDropdown.set('Select Type')
+            weightEntry.delete(0, tk.END)
+            setsEntry.delete(0, tk.END)
+            repsEntry.delete(0, tk.END)
+            intensityDropdown.set('1–10')
+
             messagebox.showinfo('Saved', 'Added to History')
 
         #Top Frame and Headers for Daylog spreadsheet layout
@@ -201,6 +227,9 @@ def openWorkoutHistory():
     workoutHistoryWindow.geometry('640x480+300+300')
     workoutHistoryWindow.resizable(True, True)
     workoutHistoryWindow.configure(bg = '#D3D3D3')
+    #Inserts Rep Icon for window
+    workoutHistoryIconImage = ImageTk.PhotoImage(Image.open('REP.png'))
+    workoutHistoryWindow.iconphoto(False, workoutHistoryIconImage)
     #Prevents interaction with other windows while opened
     workoutHistoryWindow.grab_set()
 
@@ -209,12 +238,16 @@ def openWorkoutHistory():
         workoutHistoryWindow.destroy()
 
     def deleteWorkoutHistoryEntry():
-        """Deletes the selected workout entry from the history and shows confirmation"""
+        """Deletes the selected workout entry from the history and WorkoutSaveHistory.txt then shows confirmation"""
         selectedIndex = historyDisplay.curselection()
         if selectedIndex:
             index = selectedIndex[0]
             del exerciseLog[index]
             historyDisplay.delete(index)
+
+            with open(saveFilePath, 'w') as file:
+                for log in exerciseLog:
+                    file.write(f"{log[0]} | {log[1]}\n")
             messagebox.showinfo('Deleted Entry', 'The selected workout has been deleted.')
 
     # Creates a frame to display history
@@ -264,9 +297,9 @@ root = tk.Tk()
 #Sets the GUI Title for the Main Window
 root.title('FitRep Tracker')
 
-#Inserts REP icon for windows
-iconImage = ImageTk.PhotoImage(Image.open('REP.png'))
-root.iconphoto(False, iconImage)
+#Inserts REP icon for main window
+mainiconImage = ImageTk.PhotoImage(Image.open('REP.png'))
+root.iconphoto(False, mainiconImage)
 
 #Sets the root window size and enables size change of window
 root.geometry('640x480+300+300')
